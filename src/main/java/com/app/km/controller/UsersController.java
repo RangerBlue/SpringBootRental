@@ -1,6 +1,5 @@
 package com.app.km.controller;
 
-import com.app.km.request.Users;
 import com.app.km.entity.UsersEntity;
 import com.app.km.respository.UsersRepository;
 import com.app.km.util.CustomErrorType;
