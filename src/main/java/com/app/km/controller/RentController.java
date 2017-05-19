@@ -2,6 +2,7 @@ package com.app.km.controller;
 
 import com.app.km.entity.CarEntity;
 import com.app.km.entity.RentEntity;
+import com.app.km.request.AddRentRequest;
 import com.app.km.request.RentRequest;
 import com.app.km.respository.CarRepository;
 import com.app.km.respository.RentRepository;
@@ -10,6 +11,8 @@ import com.app.km.util.CustomErrorType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
@@ -80,8 +83,9 @@ public class RentController {
     //update, end of rent
     @RequestMapping(value="finish/{id}", method = RequestMethod.POST)
     public ResponseEntity<?> finishRent(@PathVariable int id){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         RentEntity currentRent = rentRepository.findOne(id);
-        if(currentRent == null)
+        if(currentRent == null || currentRent.getUserEntity().getUsername().equals(auth.getName()))
             return new ResponseEntity(new CustomErrorType("Unable to finish rent with id "+id), HttpStatus.NOT_FOUND);
         else{
             currentRent.setEnd(new Timestamp(System.currentTimeMillis()));
@@ -96,13 +100,14 @@ public class RentController {
 
     //insert
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<?> addRent(@RequestBody RentRequest addRentRequest){
+    public ResponseEntity<?> addRent(@RequestBody AddRentRequest addRentRequest){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         RentEntity rent = new RentEntity();
         rent.setStart(new Timestamp(System.currentTimeMillis()));
-        rent.setUserEntity(userRepository.findOne(addRentRequest.getUsers_iduser()));
-        CarEntity car = carRepository.findOne(addRentRequest.getCar_idcar());
+        rent.setUserEntity(userRepository.findByUsername(auth.getName()));
+        CarEntity car = carRepository.findOne(addRentRequest.getIdcar());
         if(!car.isAvailable())
-            return new ResponseEntity(new CustomErrorType("Unable to create rent, car with id "+addRentRequest.getCar_idcar()+" isnt't available"), HttpStatus.CONFLICT);
+            return new ResponseEntity(new CustomErrorType("Unable to create rent, car with id "+addRentRequest.getIdcar()+" isnt't available"), HttpStatus.CONFLICT);
         rent.setCarEntity(car);
         car.setAvailable(false);
         carRepository.save(car);

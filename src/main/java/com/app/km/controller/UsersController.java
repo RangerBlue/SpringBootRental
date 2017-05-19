@@ -1,8 +1,11 @@
 package com.app.km.controller;
 
 import com.app.km.entity.UsersEntity;
+import com.app.km.request.UserRequest;
+import com.app.km.respository.RoleRepository;
 import com.app.km.respository.UsersRepository;
 import com.app.km.util.CustomErrorType;
+import org.omg.CORBA.UserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +21,16 @@ import java.util.List;
 @RequestMapping("api/users")
 public class UsersController {
     private UsersRepository usersRepository;
+    private RoleRepository roleRepository;
+    private final int ROLE_USER = 2;
 
     @Autowired
-    public UsersController(UsersRepository usersRepository)
-    {
+    public UsersController(UsersRepository usersRepository, RoleRepository roleRepository) {
         this.usersRepository = usersRepository;
+        this.roleRepository = roleRepository;
     }
+
+
 
     //select *
     @RequestMapping(method = RequestMethod.GET)
@@ -47,23 +54,32 @@ public class UsersController {
     }
 
     //insert
-    @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<?> addUsers(@RequestBody UsersEntity addUserRequest){
+    @RequestMapping(method = RequestMethod.PUT)
+    public ResponseEntity<?> addUsers(@RequestBody UserRequest addUserRequest){
+        if(usersRepository.findByUsername(addUserRequest.getUsername()) != null)
+            return new ResponseEntity(new CustomErrorType("Unable to create user, user with username "+addUserRequest.getUsername()+" already exists"), HttpStatus.CONFLICT);
         UsersEntity user = new UsersEntity();
         user.setName(addUserRequest.getName());
         user.setLastname(addUserRequest.getLastname());
         user.setUsername(addUserRequest.getUsername());
+        user.setPassword(addUserRequest.getPassword());
+        user.setEmail(addUserRequest.getEmail());
+        user.setEnabled(true);
+        user.setRoleEntity(roleRepository.findOne(ROLE_USER));
         usersRepository.save(user);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     //update
     @RequestMapping(value="/{id}", method = RequestMethod.POST)
-    public ResponseEntity<?> updateUser(@PathVariable int id, @RequestBody UsersEntity user){
+    public ResponseEntity<?> updateUser(@PathVariable int id, @RequestBody UserRequest user){
         UsersEntity currentUser = usersRepository.findOne(id);
         if(currentUser == null)
             return new ResponseEntity(new CustomErrorType("Unable to update user with id "+id), HttpStatus.NOT_FOUND);
-        else{
+        else if(usersRepository.findByUsername(user.getUsername()) != null)
+            return new ResponseEntity(new CustomErrorType("Unable to update user, user with username "+user.getUsername()+" already exists"), HttpStatus.CONFLICT);
+        else
+        {
             currentUser.setName(user.getName());
             currentUser.setLastname(user.getLastname());
             currentUser.setUsername(user.getUsername());

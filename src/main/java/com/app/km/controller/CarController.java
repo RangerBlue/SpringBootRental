@@ -6,6 +6,7 @@ import com.app.km.util.CustomErrorType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -83,7 +84,7 @@ public class CarController {
     }
 
     //delete all
-    @RequestMapping( method = RequestMethod.DELETE)
+    @RequestMapping(method = RequestMethod.DELETE)
     public ResponseEntity<?> deleteAllCars(){
         carRepository.deleteAll();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
