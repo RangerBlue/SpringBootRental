@@ -29,7 +29,7 @@ public class CarController {
     public ResponseEntity<List<CarEntity>> findAllCars(){
         List<CarEntity> cars = carRepository.findAll();
         if(cars.isEmpty())
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new CustomErrorType("No cars found"),HttpStatus.NOT_FOUND);
         else
             return new ResponseEntity(cars, HttpStatus.OK);
     }
@@ -46,11 +46,13 @@ public class CarController {
 
     //insert
     @RequestMapping(method = RequestMethod.POST)
-    public void addCar(@RequestBody CarEntity addCarRequest){
+    public ResponseEntity<?> addCar(@RequestBody CarEntity addCarRequest){
         CarEntity car = new CarEntity();
         car.setBrand(addCarRequest.getBrand());
         car.setModel(addCarRequest.getModel());
+        car.setAvailable(addCarRequest.isAvailable());
         carRepository.save(car);
+        return new ResponseEntity<>(car, HttpStatus.CREATED);
     }
 
     //update
@@ -62,6 +64,7 @@ public class CarController {
         else{
             currentCar.setBrand(car.getBrand());
             currentCar.setModel(car.getModel());
+            currentCar.setAvailable(car.isAvailable());
             carRepository.save(currentCar);
             return new ResponseEntity<>(currentCar, HttpStatus.OK);
         }

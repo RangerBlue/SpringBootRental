@@ -12,6 +12,7 @@ public class CarEntity {
     private int idcar;
     private String brand;
     private String model;
+    private boolean available;
 
     @Id
     @Column(name = "idcar")
@@ -43,6 +44,15 @@ public class CarEntity {
         this.model = model;
     }
 
+    @Basic
+    @Column(name = "available")
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -52,10 +62,9 @@ public class CarEntity {
         CarEntity carEntity = (CarEntity) o;
 
         if (idcar != carEntity.idcar) return false;
+        if (available != carEntity.available) return false;
         if (brand != null ? !brand.equals(carEntity.brand) : carEntity.brand != null) return false;
-        if (model != null ? !model.equals(carEntity.model) : carEntity.model != null) return false;
-
-        return true;
+        return model != null ? model.equals(carEntity.model) : carEntity.model == null;
     }
 
     @Override
@@ -63,6 +72,7 @@ public class CarEntity {
         int result = idcar;
         result = 31 * result + (brand != null ? brand.hashCode() : 0);
         result = 31 * result + (model != null ? model.hashCode() : 0);
+        result = 31 * result + (available ? 1 : 0);
         return result;
     }
 }

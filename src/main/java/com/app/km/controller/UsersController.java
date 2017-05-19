@@ -30,19 +30,9 @@ public class UsersController {
     public ResponseEntity<List<UsersEntity>> findAllUsers(){
         List<UsersEntity> users = usersRepository.findAll();
         if(users.isEmpty())
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            return new ResponseEntity(new CustomErrorType("No users found"), HttpStatus.NOT_FOUND);
         else
             return new ResponseEntity(users, HttpStatus.OK);
-    }
-
-    //insert
-    @RequestMapping(method = RequestMethod.POST)
-    public void addUsers(@RequestBody UsersEntity addUserRequest){
-        UsersEntity user = new UsersEntity();
-        user.setName(addUserRequest.getName());
-        user.setLastname(addUserRequest.getLastname());
-        user.setUsername(addUserRequest.getUsername());
-        usersRepository.save(user);
     }
 
     //select where id
@@ -54,6 +44,17 @@ public class UsersController {
                     HttpStatus.NOT_FOUND);
         else
             return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    //insert
+    @RequestMapping(method = RequestMethod.POST)
+    public ResponseEntity<?> addUsers(@RequestBody UsersEntity addUserRequest){
+        UsersEntity user = new UsersEntity();
+        user.setName(addUserRequest.getName());
+        user.setLastname(addUserRequest.getLastname());
+        user.setUsername(addUserRequest.getUsername());
+        usersRepository.save(user);
+        return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     //update

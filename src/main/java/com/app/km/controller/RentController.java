@@ -1,5 +1,6 @@
 package com.app.km.controller;
 
+import com.app.km.entity.CarEntity;
 import com.app.km.entity.RentEntity;
 import com.app.km.request.RentRequest;
 import com.app.km.respository.CarRepository;
@@ -60,10 +61,34 @@ public class RentController {
         if(currentRent == null)
             return new ResponseEntity(new CustomErrorType("Unable to update rent with id "+id), HttpStatus.NOT_FOUND);
         else{
-            currentRent.setStart(rent.getStart());
-            currentRent.setEnd(rent.getEnd());
+            CarEntity car = carRepository.findOne(rent.getCar_idcar());
+            if(!car.isAvailable())
+                return new ResponseEntity(new CustomErrorType("Unable to create rent, car with id "+rent.getCar_idcar()+" isnt't available"), HttpStatus.CONFLICT);
+            CarEntity currentCar = currentRent.getCarEntity();
+            currentCar.setAvailable(true);
+            car.setAvailable(false);
+            carRepository.save(car);
+            carRepository.save(currentCar);
             currentRent.setUserEntity(userRepository.findOne(rent.getUsers_iduser()));
-            currentRent.setCarEntity(carRepository.findOne(rent.getCar_idcar()));
+            currentRent.setCarEntity(car);
+            rentRepository.save(currentRent);
+            return new ResponseEntity<>(currentRent, HttpStatus.OK);
+        }
+
+    }
+
+    //update, end of rent
+    @RequestMapping(value="finish/{id}", method = RequestMethod.POST)
+    public ResponseEntity<?> finishRent(@PathVariable int id){
+        RentEntity currentRent = rentRepository.findOne(id);
+        if(currentRent == null)
+            return new ResponseEntity(new CustomErrorType("Unable to finish rent with id "+id), HttpStatus.NOT_FOUND);
+        else{
+            currentRent.setEnd(new Timestamp(System.currentTimeMillis()));
+            CarEntity car = carRepository.findOne(currentRent.getCarEntity().getIdcar());
+            car.setAvailable(true);
+            carRepository.save(car);
+            rentRepository.save(currentRent);
             return new ResponseEntity<>(currentRent, HttpStatus.OK);
         }
 
@@ -71,12 +96,18 @@ public class RentController {
 
     //insert
     @RequestMapping(method = RequestMethod.POST)
-    public void addRent(@RequestBody RentRequest addRentRequest){
+    public ResponseEntity<?> addRent(@RequestBody RentRequest addRentRequest){
         RentEntity rent = new RentEntity();
         rent.setStart(new Timestamp(System.currentTimeMillis()));
         rent.setUserEntity(userRepository.findOne(addRentRequest.getUsers_iduser()));
-        rent.setCarEntity(carRepository.findOne(addRentRequest.getCar_idcar()));
+        CarEntity car = carRepository.findOne(addRentRequest.getCar_idcar());
+        if(!car.isAvailable())
+            return new ResponseEntity(new CustomErrorType("Unable to create rent, car with id "+addRentRequest.getCar_idcar()+" isnt't available"), HttpStatus.CONFLICT);
+        rent.setCarEntity(car);
+        car.setAvailable(false);
+        carRepository.save(car);
         rentRepository.save(rent);
+        return new ResponseEntity<>(rent, HttpStatus.CREATED);
     }
 
     //delete

@@ -55,7 +55,7 @@ public class RentEntity {
         this.userEntity = user;
     }
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name="car_idcar")
     public CarEntity getCarEntity() {
         return carEntity;
