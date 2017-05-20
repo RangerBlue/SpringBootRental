@@ -99,14 +99,14 @@ public class RentController {
     }
 
     //insert
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.PUT)
     public ResponseEntity<?> addRent(@RequestBody AddRentRequest addRentRequest){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         RentEntity rent = new RentEntity();
         rent.setStart(new Timestamp(System.currentTimeMillis()));
         rent.setUserEntity(userRepository.findByUsername(auth.getName()));
         CarEntity car = carRepository.findOne(addRentRequest.getIdcar());
-        if(!car.isAvailable())
+        if(car == null || car.isAvailable()  )
             return new ResponseEntity(new CustomErrorType("Unable to create rent, car with id "+addRentRequest.getIdcar()+" isnt't available"), HttpStatus.CONFLICT);
         rent.setCarEntity(car);
         car.setAvailable(false);

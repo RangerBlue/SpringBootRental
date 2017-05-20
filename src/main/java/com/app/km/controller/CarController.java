@@ -46,7 +46,7 @@ public class CarController {
     }
 
     //insert
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.PUT)
     public ResponseEntity<?> addCar(@RequestBody CarEntity addCarRequest){
         CarEntity car = new CarEntity();
         car.setBrand(addCarRequest.getBrand());

@@ -5,10 +5,13 @@ import com.app.km.request.UserRequest;
 import com.app.km.respository.RoleRepository;
 import com.app.km.respository.UsersRepository;
 import com.app.km.util.CustomErrorType;
-import org.omg.CORBA.UserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +26,7 @@ public class UsersController {
     private UsersRepository usersRepository;
     private RoleRepository roleRepository;
     private final int ROLE_USER = 2;
+    private final int ROLE_ADMIN = 1;
 
     @Autowired
     public UsersController(UsersRepository usersRepository, RoleRepository roleRepository) {
@@ -35,6 +39,9 @@ public class UsersController {
     //select *
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<UsersEntity>> findAllUsers(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if(usersRepository.findByUsername(auth.getName()).getRoleEntity().getId() != ROLE_ADMIN)
+            return new ResponseEntity(HttpStatus.FORBIDDEN);
         List<UsersEntity> users = usersRepository.findAll();
         if(users.isEmpty())
             return new ResponseEntity(new CustomErrorType("No users found"), HttpStatus.NOT_FOUND);
@@ -45,6 +52,9 @@ public class UsersController {
     //select where id
     @RequestMapping(value="/{id}", method = RequestMethod.GET)
     public ResponseEntity<?> getUserWhereId(@PathVariable int id){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if(usersRepository.findByUsername(auth.getName()).getIdusers() != id)
+            return new ResponseEntity(HttpStatus.FORBIDDEN);
         UsersEntity user = usersRepository.findOne(id);
         if(user == null)
             return new ResponseEntity(new CustomErrorType("User with id "+id+" not found"),
