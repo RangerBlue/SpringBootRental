@@ -19,6 +19,19 @@ CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
 USE `mydb` ;
 
 -- -----------------------------------------------------
+-- Table `mydb`.`role`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`role` ;
+CREATE TABLE `mydb`.`role` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `role` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB;
+
+INSERT INTO `role` ( `role`) VALUES
+('ROLE_ADMIN'),
+('ROLE_USER');
+-- -----------------------------------------------------
 -- Table `mydb`.`users`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `mydb`.`users` ;
@@ -28,10 +41,20 @@ CREATE TABLE IF NOT EXISTS `mydb`.`users` (
   `name` VARCHAR(45) NOT NULL,
   `lastname` VARCHAR(45) NOT NULL,
   `username` VARCHAR(45) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `email` varchar(45) NOT NULL,
+  `enabled` bool NOT NULL,
+  `role_id` INT DEFAULT NULL,
+  INDEX `fk_rent_user_role_idx` (`role_id` ASC),
+  CONSTRAINT `fk_role_id`
+    FOREIGN KEY (`role_id`)
+    REFERENCES `mydb`.`role` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   PRIMARY KEY (`idusers`))
 ENGINE = InnoDB;
 
-
+insert into `users` values(null,'admin','admin','admin','$2a$10$TJ67btrXLLt4mrsqY6pYBuohGTPDMR.REbtmPBoHI3KY5a9EQIyTy', 'admin@admin.pl', 1, 1);
 -- -----------------------------------------------------
 -- Table `mydb`.`car`
 -- -----------------------------------------------------
@@ -41,6 +64,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`car` (
   `idcar` INT NOT NULL AUTO_INCREMENT,
   `brand` VARCHAR(45) NOT NULL,
   `model` VARCHAR(45) NOT NULL,
+  `available` BOOL NOT NULL,
   PRIMARY KEY (`idcar`),
   UNIQUE INDEX `idcar_UNIQUE` (`idcar` ASC))
 ENGINE = InnoDB;
