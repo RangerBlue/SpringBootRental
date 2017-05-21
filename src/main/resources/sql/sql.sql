@@ -55,6 +55,8 @@ CREATE TABLE IF NOT EXISTS `mydb`.`users` (
 ENGINE = InnoDB;
 
 insert into `users` values(null,'admin','admin','admin','$2a$10$TJ67btrXLLt4mrsqY6pYBuohGTPDMR.REbtmPBoHI3KY5a9EQIyTy', 'admin@admin.pl', 1, 1);
+insert into `users` values(null, 'user', 'user', 'user', '$2a$10$FTGD71RyXUsSqH1TuwWwt.GZFa/pUAlXGYC2VxEbsv92OZuVntNBu', 'test@test.pl', 1, 2);
+
 -- -----------------------------------------------------
 -- Table `mydb`.`car`
 -- -----------------------------------------------------
@@ -69,6 +71,9 @@ CREATE TABLE IF NOT EXISTS `mydb`.`car` (
   UNIQUE INDEX `idcar_UNIQUE` (`idcar` ASC))
 ENGINE = InnoDB;
 
+insert into `car` values(null, 'Porshe', '711', true);
+insert into `car` values(null, 'Lamborgini', 'Gallardo', true);
+insert into `car` values(null, 'Ferrari' , 'California', false);
 
 -- -----------------------------------------------------
 -- Table `mydb`.`rent`
@@ -97,6 +102,9 @@ CREATE TABLE IF NOT EXISTS `mydb`.`rent` (
     ON DELETE CASCADE
     ON UPDATE CASCADE)
 ENGINE = InnoDB;
+
+insert into `rent` values(null, '2017-05-21 22:46:35', NULL, 2, 3);
+insert into `rent` values(null, '2017-05-21 23:46:35',  '2017-05-21 23:50:35', 2, 2);
 
 
 SET SQL_MODE=@OLD_SQL_MODE;
