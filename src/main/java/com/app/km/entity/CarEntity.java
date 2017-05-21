@@ -1,7 +1,6 @@
 package com.app.km.entity;
 
 import javax.persistence.*;
-import java.util.Set;
 
 /**
  * Created by Kamil-PC on 17.05.2017.

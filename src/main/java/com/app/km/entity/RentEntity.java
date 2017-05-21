@@ -46,7 +46,7 @@ public class RentEntity {
     }
 
     @ManyToOne
-    @JoinColumn(name="users_idusers")
+    @JoinColumn(name = "users_idusers")
     public UsersEntity getUserEntity() {
         return userEntity;
     }
@@ -56,7 +56,7 @@ public class RentEntity {
     }
 
     @ManyToOne
-    @JoinColumn(name="car_idcar")
+    @JoinColumn(name = "car_idcar")
     public CarEntity getCarEntity() {
         return carEntity;
     }
@@ -74,9 +74,7 @@ public class RentEntity {
 
         if (idrent != that.idrent) return false;
         if (start != null ? !start.equals(that.start) : that.start != null) return false;
-        if (end != null ? !end.equals(that.end) : that.end != null) return false;
-
-        return true;
+        return end != null ? end.equals(that.end) : that.end == null;
     }
 
     @Override

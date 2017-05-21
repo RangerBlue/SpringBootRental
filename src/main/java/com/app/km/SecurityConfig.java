@@ -12,7 +12,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.sql.DataSource;
-import java.util.Arrays;
 
 /**
  * Created by Kamil-PC on 19.05.2017.
@@ -39,18 +38,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .httpBasic()
                 .and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.PUT,"/api/users/**").permitAll()
-                .antMatchers(HttpMethod.GET,"/api/car/**").permitAll()
-                .antMatchers(HttpMethod.GET,"/api/users/**").hasAnyRole("ADMIN","USER")
-                .antMatchers(HttpMethod.POST,"/api/users/**").hasAnyRole("ADMIN","USER")
-                .antMatchers(HttpMethod.GET,"/api/rent/**").hasAnyRole("ADMIN","USER")
-                .antMatchers(HttpMethod.PUT,"/api/rent/**").hasAnyRole("ADMIN","USER")
-                .antMatchers(HttpMethod.POST,"/api/rent/**").hasAnyRole("ADMIN","USER")
-                .antMatchers(HttpMethod.POST,"/api/car/**").hasRole("ADMIN")
-                .antMatchers(HttpMethod.PUT,"/api/car/**").hasRole("ADMIN")
-                .antMatchers(HttpMethod.DELETE,"/api/users/**").hasRole("ADMIN")
-                .antMatchers(HttpMethod.DELETE,"/api/car/**").hasRole("ADMIN")
-                .antMatchers(HttpMethod.DELETE,"/api/rent/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.PUT, "/api/users/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/car/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/users/**").hasAnyRole("ADMIN", "USER")
+                .antMatchers(HttpMethod.POST, "/api/users/**").hasAnyRole("ADMIN", "USER")
+                .antMatchers(HttpMethod.GET, "/api/rent/**").hasAnyRole("ADMIN", "USER")
+                .antMatchers(HttpMethod.PUT, "/api/rent/**").hasAnyRole("ADMIN", "USER")
+                .antMatchers(HttpMethod.POST, "/api/rent/**").hasAnyRole("ADMIN", "USER")
+                .antMatchers(HttpMethod.POST, "/api/car/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.PUT, "/api/car/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.DELETE, "/api/users/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.DELETE, "/api/car/**").hasRole("ADMIN")
+                .antMatchers(HttpMethod.DELETE, "/api/rent/**").hasRole("ADMIN")
                 .anyRequest().fullyAuthenticated()
                 .and()
                 .formLogin()

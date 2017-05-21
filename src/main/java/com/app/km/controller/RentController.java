@@ -21,7 +21,7 @@ import java.util.List;
  * Created by Kamil-PC on 18.05.2017.
  */
 
-@RestController(value="rent")
+@RestController(value = "rent")
 @RequestMapping("api/rent")
 public class RentController {
     private RentRepository rentRepository;
@@ -37,35 +37,35 @@ public class RentController {
 
     //select *
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<List<RentEntity>> findAllRents(){
+    public ResponseEntity<List<RentEntity>> findAllRents() {
         List<RentEntity> rents = rentRepository.findAll();
-        if(rents.isEmpty())
+        if (rents.isEmpty())
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         else
             return new ResponseEntity(rents, HttpStatus.OK);
     }
 
     //select where id
-    @RequestMapping(value="/{id}", method = RequestMethod.GET)
-    public ResponseEntity<?> getRentWhereId(@PathVariable int id){
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    public ResponseEntity<?> getRentWhereId(@PathVariable int id) {
         RentEntity user = rentRepository.findOne(id);
-        if(user == null)
-            return new ResponseEntity(new CustomErrorType("Rent with id "+id+" not found"),
+        if (user == null)
+            return new ResponseEntity(new CustomErrorType("Rent with id " + id + " not found"),
                     HttpStatus.NOT_FOUND);
         else
             return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     //update
-    @RequestMapping(value="/{id}", method = RequestMethod.POST)
-    public ResponseEntity<?> updateRent(@PathVariable int id, @RequestBody RentRequest rent){
+    @RequestMapping(value = "/{id}", method = RequestMethod.POST)
+    public ResponseEntity<?> updateRent(@PathVariable int id, @RequestBody RentRequest rent) {
         RentEntity currentRent = rentRepository.findOne(id);
-        if(currentRent == null)
-            return new ResponseEntity(new CustomErrorType("Unable to update rent with id "+id), HttpStatus.NOT_FOUND);
-        else{
+        if (currentRent == null)
+            return new ResponseEntity(new CustomErrorType("Unable to update rent with id " + id), HttpStatus.NOT_FOUND);
+        else {
             CarEntity car = carRepository.findOne(rent.getIdcar());
-            if(!car.isAvailable())
-                return new ResponseEntity(new CustomErrorType("Unable to create rent, car with id "+rent.getIdcar()+" isnt't available"), HttpStatus.CONFLICT);
+            if (!car.isAvailable())
+                return new ResponseEntity(new CustomErrorType("Unable to create rent, car with id " + rent.getIdcar() + " isnt't available"), HttpStatus.CONFLICT);
             CarEntity currentCar = currentRent.getCarEntity();
             currentCar.setAvailable(true);
             car.setAvailable(false);
@@ -79,13 +79,13 @@ public class RentController {
     }
 
     //update, end of rent
-    @RequestMapping(value="finish/{id}", method = RequestMethod.POST)
-    public ResponseEntity<?> finishRent(@PathVariable int id){
+    @RequestMapping(value = "finish/{id}", method = RequestMethod.POST)
+    public ResponseEntity<?> finishRent(@PathVariable int id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         RentEntity currentRent = rentRepository.findOne(id);
-        if(currentRent == null || !currentRent.getUserEntity().getUsername().equals(auth.getName()))
-            return new ResponseEntity(new CustomErrorType("Unable to finish rent with id "+id), HttpStatus.NOT_FOUND);
-        else{
+        if (currentRent == null || !currentRent.getUserEntity().getUsername().equals(auth.getName()))
+            return new ResponseEntity(new CustomErrorType("Unable to finish rent with id " + id), HttpStatus.NOT_FOUND);
+        else {
             currentRent.setEnd(new Timestamp(System.currentTimeMillis()));
             CarEntity car = carRepository.findOne(currentRent.getCarEntity().getIdcar());
             car.setAvailable(true);
@@ -98,14 +98,14 @@ public class RentController {
 
     //insert
     @RequestMapping(method = RequestMethod.PUT)
-    public ResponseEntity<?> addRent(@RequestBody RentRequest rentRequest){
+    public ResponseEntity<?> addRent(@RequestBody RentRequest rentRequest) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         RentEntity rent = new RentEntity();
         rent.setStart(new Timestamp(System.currentTimeMillis()));
         rent.setUserEntity(userRepository.findByUsername(auth.getName()));
         CarEntity car = carRepository.findOne(rentRequest.getIdcar());
-        if(car == null || !car.isAvailable()  )
-            return new ResponseEntity(new CustomErrorType("Unable to create rent, car with id "+ rentRequest.getIdcar()+" isnt't available"), HttpStatus.CONFLICT);
+        if (car == null || !car.isAvailable())
+            return new ResponseEntity(new CustomErrorType("Unable to create rent, car with id " + rentRequest.getIdcar() + " isnt't available"), HttpStatus.CONFLICT);
         rent.setCarEntity(car);
         car.setAvailable(false);
         carRepository.save(car);
@@ -114,12 +114,12 @@ public class RentController {
     }
 
     //delete
-    @RequestMapping(value="/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteRent(@PathVariable int id){
+    @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
+    public ResponseEntity<?> deleteRent(@PathVariable int id) {
         RentEntity rent = rentRepository.findOne(id);
-        if(rent == null)
-            return new ResponseEntity(new CustomErrorType("Unable to delete rent with id "+id), HttpStatus.NOT_FOUND);
-        else{
+        if (rent == null)
+            return new ResponseEntity(new CustomErrorType("Unable to delete rent with id " + id), HttpStatus.NOT_FOUND);
+        else {
             rentRepository.delete(id);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
@@ -128,7 +128,7 @@ public class RentController {
 
     //delete all
     @RequestMapping(method = RequestMethod.DELETE)
-    public ResponseEntity<?> deleteAllRents(){
+    public ResponseEntity<?> deleteAllRents() {
         rentRepository.deleteAll();
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

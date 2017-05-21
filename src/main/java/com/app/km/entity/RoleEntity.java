@@ -39,9 +39,7 @@ public class RoleEntity {
         RoleEntity that = (RoleEntity) o;
 
         if (id != that.id) return false;
-        if (role != null ? !role.equals(that.role) : that.role != null) return false;
-
-        return true;
+        return role != null ? role.equals(that.role) : that.role == null;
     }
 
     @Override

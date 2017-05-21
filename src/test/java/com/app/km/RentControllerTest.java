@@ -17,16 +17,20 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+
+import javax.servlet.Filter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import javax.servlet.Filter;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
 /**
  * Created by Kamil-PC on 21.05.2017.
@@ -37,44 +41,44 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 @WebAppConfiguration
 @Transactional
 public class RentControllerTest {
-        private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
-                MediaType.APPLICATION_JSON.getSubtype(),
-                Charset.forName("utf8"));
+    private MediaType contentType = new MediaType(MediaType.APPLICATION_JSON.getType(),
+            MediaType.APPLICATION_JSON.getSubtype(),
+            Charset.forName("utf8"));
 
-        private MockMvc mockMvc;
+    private MockMvc mockMvc;
 
-        private HttpMessageConverter mappingJackson2HttpMessageConverter;
-
-
-        @Autowired
-        private WebApplicationContext webApplicationContext;
+    private HttpMessageConverter mappingJackson2HttpMessageConverter;
 
 
-        @Autowired
-        private RentRepository rentRepository;
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
-        @Autowired
-        private CarRepository carRepository;
 
-        @Autowired
-        private Filter springSecurityFilterChain;
+    @Autowired
+    private RentRepository rentRepository;
 
-        @Autowired
-        void setConverters(HttpMessageConverter<?>[] converters) {
+    @Autowired
+    private CarRepository carRepository;
 
-            this.mappingJackson2HttpMessageConverter = Arrays.asList(converters).stream()
-                    .filter(hmc -> hmc instanceof MappingJackson2HttpMessageConverter)
-                    .findAny()
-                    .orElse(null);
+    @Autowired
+    private Filter springSecurityFilterChain;
 
-            assertNotNull("the JSON message converter must not be null",
-                    this.mappingJackson2HttpMessageConverter);
-        }
+    @Autowired
+    void setConverters(HttpMessageConverter<?>[] converters) {
 
-        @Before
-        public void setup() throws Exception {
-            this.mockMvc = webAppContextSetup(webApplicationContext).addFilters(springSecurityFilterChain).build();
-        }
+        this.mappingJackson2HttpMessageConverter = Arrays.asList(converters).stream()
+                .filter(hmc -> hmc instanceof MappingJackson2HttpMessageConverter)
+                .findAny()
+                .orElse(null);
+
+        assertNotNull("the JSON message converter must not be null",
+                this.mappingJackson2HttpMessageConverter);
+    }
+
+    @Before
+    public void setup() throws Exception {
+        this.mockMvc = webAppContextSetup(webApplicationContext).addFilters(springSecurityFilterChain).build();
+    }
 
     @Test
     public void getOneRentAsGuestShouldFail() throws Exception {
@@ -85,7 +89,7 @@ public class RentControllerTest {
 
     @Test
     public void getOneRentAsUserShouldSucceed() throws Exception {
-        mockMvc.perform(get("/api/rent/1").with(httpBasic("user","user")))
+        mockMvc.perform(get("/api/rent/1").with(httpBasic("user", "user")))
                 .andExpect(status().isOk());
     }
 
@@ -98,7 +102,7 @@ public class RentControllerTest {
     @Test
     public void getAllRentsAsUserShouldSucceed() throws Exception {
         int size = rentRepository.findAll().size();
-        mockMvc.perform(get("/api/rent/").with(httpBasic("user","user")))
+        mockMvc.perform(get("/api/rent/").with(httpBasic("user", "user")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(size)));
     }
@@ -119,7 +123,7 @@ public class RentControllerTest {
         RentRequest rent = new RentRequest();
         rent.setIdcar(1);
         String rentJson = json(rent);
-        this.mockMvc.perform(put("/api/rent/").with(httpBasic("user","user"))
+        this.mockMvc.perform(put("/api/rent/").with(httpBasic("user", "user"))
                 .contentType(contentType)
                 .content(rentJson))
                 .andExpect(status().isCreated());
@@ -130,7 +134,7 @@ public class RentControllerTest {
         RentRequest rent = new RentRequest();
         rent.setIdcar(3);
         String rentJson = json(rent);
-        this.mockMvc.perform(put("/api/rent/").with(httpBasic("user","user"))
+        this.mockMvc.perform(put("/api/rent/").with(httpBasic("user", "user"))
                 .contentType(contentType)
                 .content(rentJson))
                 .andExpect(status().isConflict());
@@ -152,7 +156,7 @@ public class RentControllerTest {
         RentRequest rent = new RentRequest();
         rent.setIdcar(2);
         String rentJson = json(rent);
-        this.mockMvc.perform(post("/api/rent/1").with(httpBasic("user","user"))
+        this.mockMvc.perform(post("/api/rent/1").with(httpBasic("user", "user"))
                 .contentType(contentType)
                 .content(rentJson))
                 .andExpect(status().isOk());
@@ -164,7 +168,7 @@ public class RentControllerTest {
 
     @Test
     public void updateToFinishRentAndSetCarAsAvailableAsUserShouldSucceed() throws Exception {
-        this.mockMvc.perform(post("/api/rent/finish/1").with(httpBasic("user","user"))
+        this.mockMvc.perform(post("/api/rent/finish/1").with(httpBasic("user", "user"))
                 .contentType(contentType))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/api/car/3"))
@@ -174,28 +178,28 @@ public class RentControllerTest {
 
     @Test
     public void deleteRentAsUserShouldFail() throws Exception {
-        this.mockMvc.perform(delete("/api/rent/1").with(httpBasic("user","user"))
+        this.mockMvc.perform(delete("/api/rent/1").with(httpBasic("user", "user"))
                 .contentType(contentType))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     public void deleteRentAsAdminShouldSucceed() throws Exception {
-        this.mockMvc.perform(delete("/api/rent/1").with(httpBasic("admin","admin"))
+        this.mockMvc.perform(delete("/api/rent/1").with(httpBasic("admin", "admin"))
                 .contentType(contentType))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     public void deleteAllRentAsUserShouldFail() throws Exception {
-        this.mockMvc.perform(delete("/api/rent/").with(httpBasic("user","user"))
+        this.mockMvc.perform(delete("/api/rent/").with(httpBasic("user", "user"))
                 .contentType(contentType))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     public void deleteAllRentAsAdminShouldSucceed() throws Exception {
-        this.mockMvc.perform(delete("/api/rent/").with(httpBasic("admin","admin"))
+        this.mockMvc.perform(delete("/api/rent/").with(httpBasic("admin", "admin"))
                 .contentType(contentType))
                 .andExpect(status().isNoContent());
     }

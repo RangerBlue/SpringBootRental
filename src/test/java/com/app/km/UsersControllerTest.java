@@ -17,16 +17,21 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+
+import javax.servlet.Filter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import javax.servlet.Filter;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
 /**
  * Created by Kamil-PC on 21.05.2017.
  */
@@ -82,7 +87,7 @@ public class UsersControllerTest {
     @Test
     public void getOneUserAsUserShouldSucceed() throws Exception {
 
-        mockMvc.perform(get("/api/users/2").with(httpBasic("user","user")))
+        mockMvc.perform(get("/api/users/2").with(httpBasic("user", "user")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username", is("user")));
     }
@@ -90,21 +95,21 @@ public class UsersControllerTest {
     @Test
     public void getOneUserWithOtherUserIdAsAdminShouldFail() throws Exception {
 
-        mockMvc.perform(get("/api/users/2").with(httpBasic("admin","admin")))
+        mockMvc.perform(get("/api/users/2").with(httpBasic("admin", "admin")))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     public void getAllUsersAsUserShouldFail() throws Exception {
 
-        mockMvc.perform(get("/api/users/").with(httpBasic("user","user")))
+        mockMvc.perform(get("/api/users/").with(httpBasic("user", "user")))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     public void getAllUsersAsAdminShouldSucceed() throws Exception {
         int size = usersRepository.findAll().size();
-        mockMvc.perform(get("/api/users/").with(httpBasic("admin","admin")))
+        mockMvc.perform(get("/api/users/").with(httpBasic("admin", "admin")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(size)));
     }
@@ -132,7 +137,7 @@ public class UsersControllerTest {
         user.setUsername("test1");
         user.setPassword("test");
         user.setEmail("test1");
-        this.mockMvc.perform(post("/api/users/2").with(httpBasic("user","user"))
+        this.mockMvc.perform(post("/api/users/2").with(httpBasic("user", "user"))
                 .contentType(contentType)
                 .content(json(user)))
                 .andExpect(status().isOk());
@@ -154,28 +159,28 @@ public class UsersControllerTest {
 
     @Test
     public void deleteUserAsUserShouldFail() throws Exception {
-        this.mockMvc.perform(delete("/api/users/2").with(httpBasic("user","user"))
+        this.mockMvc.perform(delete("/api/users/2").with(httpBasic("user", "user"))
                 .contentType(contentType))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     public void deleteUserAsAdminShouldSucceed() throws Exception {
-        this.mockMvc.perform(delete("/api/users/2").with(httpBasic("admin","admin"))
+        this.mockMvc.perform(delete("/api/users/2").with(httpBasic("admin", "admin"))
                 .contentType(contentType))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     public void deleteAllUsersAsUserShouldFail() throws Exception {
-        this.mockMvc.perform(delete("/api/users/").with(httpBasic("user","user"))
+        this.mockMvc.perform(delete("/api/users/").with(httpBasic("user", "user"))
                 .contentType(contentType))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     public void deleteAllUsersAsAdminShouldSucceed() throws Exception {
-        this.mockMvc.perform(delete("/api/users/").with(httpBasic("admin","admin"))
+        this.mockMvc.perform(delete("/api/users/").with(httpBasic("admin", "admin"))
                 .contentType(contentType))
                 .andExpect(status().isNoContent());
     }
